@@ -1,6 +1,6 @@
 // server.js
 require('dotenv').config();
-console.log('[BOOT] BARMEESTER_USERS raw =', process.env.BARMEESTER_USERS);
+
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -30,12 +30,56 @@ function verifyPassword(password, salt, hash) {
 }
 
 // =====================================
+// Demo-auth fallback
+// =====================================
+const DEMO_USER = process.env.LOGIN_USER || 'admin';
+const DEMO_PASS = process.env.LOGIN_PASS || 'admin123';
+
+// =====================================
+// Barmeester-config (env) - case-insensitive
+// =====================================
+const BARMEESTER_USERS_RAW = process.env.BARMEESTER_USERS || '';
+console.log('[BOOT] BARMEESTER_USERS raw =', BARMEESTER_USERS_RAW);
+
+const BARMEESTER_USERS = BARMEESTER_USERS_RAW
+  .split(',')
+  .map(s => s.trim().toLowerCase())
+  .filter(Boolean);
+
+function isBarmeesterUser(username) {
+  // Als geen BARMEESTER_USERS is gezet: alleen demo-user is barmeester
+  if (BARMEESTER_USERS.length === 0) {
+    return (username || '').toLowerCase() === (DEMO_USER || 'admin').toLowerCase();
+  }
+  return BARMEESTER_USERS.includes(String(username).toLowerCase());
+}
+
+function requireBarmeester(req, res, next) {
+  const ok = isBarmeesterUser(req.username);
+  // Handige debug; haal weg als je wilt.
+  console.log('[IS-BAR]', { username: req.username, BARMEESTER_USERS, ok });
+  if (ok) return next();
+  return res.status(403).json({ error: 'Geen toegang (barmeester)' });
+}
+
+// =====================================
+// Auth-middleware (token uit Authorization: Bearer ...)
+// =====================================
+function requireAuth(req, res, next) {
+  const auth = req.headers.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  const username = token ? activeTokens.get(token) : null;
+  if (!username) return res.status(401).json({ error: 'Niet geautoriseerd' });
+  req.username = username;
+  next();
+}
+
+// =====================================
 // MongoDB: URI en connectie
 // =====================================
 // Gebruik MONGODB_URI (Atlas conventie) of MONGO_URI (alternatieve naam)
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
 
-// Safety: voorkom per ongeluk localhost in productie
 if (!MONGO_URI) {
   console.error('❌ Geen MONGO_URI / MONGODB_URI gevonden. Zet deze in Railway → Variables.');
   process.exit(1);
@@ -82,39 +126,10 @@ async function seedIfNeeded() {
 }
 
 // =====================================
-// Demo-auth fallback
-// =====================================
-const DEMO_USER = process.env.LOGIN_USER || 'admin';
-const DEMO_PASS = process.env.LOGIN_PASS || 'admin123';
-
-// =====================================
-// Auth-middleware
-// =====================================
-function requireAuth(req, res, next) {
-  const auth = req.headers.authorization || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
-  const username = token ? activeTokens.get(token) : null;
-  if (!username) return res.status(401).json({ error: 'Niet geautoriseerd' });
-  req.username = username;
-  next();
-}
-
-const BARMEESTER_USERS = (process.env.BARMEESTER_USERS || '')
-  .split(',')
-  .map(s => s.trim().toLowerCase())
-  .filter(Boolean);
-
-function isBarmeesterUser(username) {
-  if (BARMEESTER_USERS.length === 0) {
-    // Fallback: alleen demo-user is barmeester als env leeg is
-    return (username || '').toLowerCase() === (process.env.LOGIN_USER || 'admin').toLowerCase();
-  }
-  return BARMEESTER_USERS.includes(String(username).toLowerCase());
-}
-
-// =====================================
 // API-routes
 // =====================================
+
+// Registreren
 app.post('/api/auth/register', async (req, res) => {
   try {
     if (mongoose.connection.readyState !== 1) {
@@ -135,8 +150,11 @@ app.post('/api/auth/register', async (req, res) => {
 
     const { salt, hash } = hashPassword(password);
     const user = await User.create({
-      username, displayName: displayName || username, streepjes: 10,
-      passwordHash: hash, passwordSalt: salt,
+      username,
+      displayName: displayName || username,
+      streepjes: 10,
+      passwordHash: hash,
+      passwordSalt: salt,
     });
 
     const token = crypto.randomUUID();
@@ -152,6 +170,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
+// Inloggen
 app.post('/api/auth/login', async (req, res) => {
   try {
     let { username, password } = req.body || {};
@@ -191,6 +210,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// Huidige user + barmeester-flag
 app.get('/api/me', requireAuth, async (req, res) => {
   let user = await User.findOne({ username: req.username });
   if (!user) user = await User.create({ username: req.username, displayName: req.username, streepjes: 10 });
@@ -202,6 +222,7 @@ app.get('/api/me', requireAuth, async (req, res) => {
   });
 });
 
+// Drankjes (afstrepers)
 app.get('/api/drinks', requireAuth, async (req, res) => {
   const drinks = await Drink.find({ active: true }).sort({ name: 1 });
   res.json(drinks);
@@ -225,7 +246,8 @@ app.post('/api/drinks/consume', requireAuth, async (req, res) => {
 
 // ===== Barmeester =====
 app.get('/api/barmeester/users', requireAuth, requireBarmeester, async (req, res) => {
-  const users = await User.find({}, { username: 1, displayName: 1, streepjes: 1 }).sort({ displayName: 1, username: 1 });
+  const users = await User.find({}, { username: 1, displayName: 1, streepjes: 1 })
+    .sort({ displayName: 1, username: 1 });
   res.json(users);
 });
 
@@ -289,6 +311,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 app.get('/app.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'app.html')));
 app.get('/barmeester.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'barmeester.html')));
+
+// Laatste fallback naar login (API-routes zitten hierboven, dus geen conflict)
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 
 // =====================================
