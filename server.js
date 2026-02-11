@@ -38,8 +38,12 @@ const DEMO_PASS = process.env.LOGIN_PASS || 'admin123';
 // =====================================
 // Barmeester-config (env) - case-insensitive
 // =====================================
-const BARMEESTER_USERS_RAW = process.env.BARMEESTER_USERS || '';
-console.log('[BOOT] BARMEESTER_USERS raw =', BARMEESTER_USERS_RAW);
+
+const BARMEESTER_USERS_RAW =
+  (process.env.BARMEESTER_USERS && process.env.BARMEESTER_USERS.trim().length > 0)
+    ? process.env.BARMEESTER_USERS
+    : 'admin,Bartmeister,Joran'; // <-- fallback als env leeg is
+
 
 const BARMEESTER_USERS = BARMEESTER_USERS_RAW
   .split(',')
