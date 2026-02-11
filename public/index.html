@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Barkaart site • App</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Barkaart site</h1>
+    <p class="subtitle">Ingelogd</p>
+  </header>
+  <main>
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <h2 style="margin:0">Nieuw item toevoegen</h2>
+        <button id="logout" class="danger">Uitloggen</button>
+      </div>
+      <form id="item-form" style="margin-top:10px">
+        <label for="text">Tekst</label>
+        <input id="text" name="text" type="text" placeholder="Bijv. nieuw drankje" required />
+        <button type="submit">Opslaan</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Items</h2>
+      <ul id="items" class="items"></ul>
+    </section>
+  </main>
+  <footer>
+    <small>© 2026 Barkaart site</small>
+  </footer>
+  <script src="/app.js"></script>
+</body>
+</html>

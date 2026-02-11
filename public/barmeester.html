@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Barkaart site • Barmeester</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Barkaart site</h1>
+    <p class="subtitle">Barmeester</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2 style="margin-top:0">Acties</h2>
+      <button id="grantBtn" style="width:100%">Barkaart toekennen (+7)</button>
+      <button id="stockBtn" style="width:100%; margin-top:8px">Voorraadbeheer</button>
+      <button id="dashboardBtn" class="" style="width:100%; margin-top:8px">Dashboard openen</button>
+      <p class="subtitle" style="margin-top:8px">Alle acties openen een popup in dezelfde stijl als afstrepen.</p>
+    </section>
+  </main>
+
+  <footer>
+    <small>© 2026 Barkaart site</small>
+  </footer>
+
+  <!-- Popup -->
+  <div class="overlay" id="overlay" aria-hidden="true" style="display:none">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+      <h3 class="title" id="modalTitle">Barmeester</h3>
+      <div id="adminContent" class="list"></div>
+
+      <div class="modal-actions">
+        <button id="closeOverlay" class="danger">Sluiten</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/barmeester.js"></script>
+</body>
+</html>

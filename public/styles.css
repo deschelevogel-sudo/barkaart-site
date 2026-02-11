@@ -1,0 +1,624 @@
+/* public/styles.css */
+:root { --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --primary:#22c55e; --danger:#ef4444; }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:linear-gradient(180deg,#0b1022,#0f172a 30%); color:var(--text)}
+header{padding:24px 16px;text-align:center}
+header h1{margin:0 0 8px;font-size:1.75rem}
+.subtitle{color:var(--muted);margin:0}
+main{max-width:720px;margin:0 auto;padding:0 16px 48px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;backdrop-filter:blur(6px);margin-bottom:16px}
+label{display:block;margin-bottom:8px;color:var(--muted)}
+input[type=text],input[type=password]{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(17,24,39,.6);color:var(--text)}
+button{margin-top:10px;background:var(--primary);color:#0b1022;border:none;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+button.danger{background:var(--danger);color:#fff}
+.items{list-style:none;padding:0;margin:0}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.item:last-child{border-bottom:none}
+.empty{color:var(--muted);padding:12px 0}
+footer{text-align:center;color:var(--muted);padding:16px}
+``
+.overlay {
+  position: fixed; inset: 0; display: none;
+  background: rgba(0,0,0,.55);
+  align-items: center; justify-content: center;
+  padding: 16px; z-index: 1000;
+}
+.overlay.active { display: flex; }
+
+.modal {
+  width: 100%; max-width: 560px;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px; padding: 16px;
+  backdrop-filter: blur(6px);
+  max-height: 80vh; overflow: auto;
+}
+
+.drinks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px; margin-top: 8px;
+}
+.drink-btn {
+  width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.15);
+  background: rgba(17,24,39,.6); color: var(--text); cursor: pointer; text-align: left;
+}
+.modal-actions {
+  display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end;
+}
+.modal .title { margin: 0 0 8px; }
+``
+/* --- bestaand bestand, laat dit allemaal staan --- */
+
+/* ===== Nieuwe styles voor selectie & mobiel ===== */
+
+/* Grotere tik-doelen op telefoon */
+button, .drink-btn {
+  min-height: 44px; /* aanbevolen minimum touch target */
+}
+
+/* Geselecteerd drankje duidelijk markeren */
+.drink-btn.selected {
+  background: #22c55e;         /* zelfde primary-kleur */
+  color: #0b1022;
+  border-color: rgba(34,197,94,.8);
+  font-weight: 700;
+}
+
+/* Visuele feedback bij klikken */
+.drink-btn:active {
+  transform: translateY(1px);
+}
+
+/* Bevestig-knop visuele staat bij disabled */
+button[disabled] {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* Modale kop dicht bij content op mobiel */
+.modal .title {
+  margin-bottom: 6px;
+}
+
+#confirm .subtitle {
+  display: none !important;
+}
+/* ==== FULLSCREEN MODAL OVERRIDES (onderaan toevoegen) ==== */
+
+/* Volledige viewport, boven alles */
+.overlay {
+  position: fixed !important;
+  top: 0 !important; 
+  left: 0 !important;
+  right: 0 !important; 
+  bottom: 0 !important;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999; /* zeer hoog zodat hij overal bovenop ligt */
+  background: rgba(0,0,0,0.55);
+  display: none; /* blijft via JS aangestuurd */
+  align-items: center;   /* verticaal centreren */
+  justify-content: center; /* horizontaal centreren */
+  padding: 16px;
+}
+
+/* Actieve modal tonen */
+.overlay.active {
+  display: flex !important;
+}
+
+/* De modale kaart zelf */
+.modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow: auto;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 16px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+/* (Mobiel) groter tikvlak en nette spacing */
+.drinks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.drink-btn {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(17,24,39,.6);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  min-height: 44px; /* mobile touch target */
+}
+
+.drink-btn.selected {
+  background: #22c55e;
+  color: #0b1022;
+  border-color: rgba(34,197,94,.8);
+  font-weight: 700;
+}
+
+/* ==== FULLSCREEN MODAL OVERRIDES + ANIMATIONS ==== */
+
+/* Volledige viewport, boven alles */
+.overlay {
+  position: fixed !important;
+  top: 0 !important; 
+  left: 0 !important;
+  right: 0 !important; 
+  bottom: 0 !important;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* Actief: tonen via flex */
+.overlay.active {
+  display: flex !important;
+  animation: fadeIn 180ms ease-out forwards;
+}
+
+/* Sluiten: fade out */
+.overlay.closing {
+  animation: fadeOut 180ms ease-in forwards;
+}
+
+/* De modale kaart zelf */
+.modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow: auto;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 16px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  will-change: transform, opacity;
+}
+
+/* Open-animatie voor modal */
+.overlay.active .modal {
+  animation: modalIn 220ms cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+/* Sluit-animatie voor modal */
+.overlay.closing .modal {
+  animation: modalOut 180ms cubic-bezier(.4,.0,1,1) forwards;
+}
+
+/* Groter tik-doel (mobiel) + selectie */
+.drinks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.drink-btn {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(17,24,39,.6);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  min-height: 44px;
+}
+.drink-btn.selected {
+  background: #22c55e;
+  color: #0b1022;
+  border-color: rgba(34,197,94,.8);
+  font-weight: 700;
+}
+
+/* Disabled knoppen visueel */
+button[disabled] { opacity: .6; cursor: not-allowed; }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes modalIn {
+  from { transform: translateY(14px) scale(.98); opacity: 0; }
+  to   { transform: translateY(0) scale(1);      opacity: 1; }
+}
+@keyframes modalOut {
+  from { transform: translateY(0) scale(1);      opacity: 1; }
+  to   { transform: translateY(10px) scale(.98); opacity: 0; }
+}
+/* ===== Barmeester lijsten & controls ===== */
+.list {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(17,24,39,.6);
+}
+.row .meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.row .meta .title {
+  font-weight: 600;
+}
+.row .meta .sub {
+  color: var(--muted);
+  font-size: .9em;
+}
+.row .actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Eenvoudige toggle */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .9em;
+}
+.toggle input[type="checkbox"] {
+  width: 18px; height: 18px;
+}
+.input-inline {
+  width: 86px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(17,24,39,.6);
+  color: var(--text);
+}
+
+/* Nieuw drankje blok */
+.new-drink {
+  margin-top: 12px;
+  border-top: 1px dashed rgba(255,255,255,.15);
+  padding-top: 12px;
+}
+/* ===== Voorraadbeheer (mobiel) – layout verbeteringen ===== */
+
+/* Zorg dat de content in de modal prettig scrolt op telefoon */
+.modal {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Lijstcontainer in popup */
+.list {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Eén kolom op mobiel: informatie boven, controls eronder */
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: stretch;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(17,24,39,.6);
+}
+
+/* Titel groter, subtitel compacter */
+.row .meta .title { 
+  font-weight: 700; 
+  font-size: 1.05rem; 
+}
+.row .meta .sub { 
+  color: var(--muted); 
+  font-size: .92rem; 
+}
+
+/* Actieblok in kolomrichting; brede knoppen en inputs */
+.row .actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto; /* stock-, toggle-, opslaan-knop */
+  gap: 10px;
+}
+
+/* Stock-editor met plus/min knoppen naast input */
+.stock-editor {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+.stock-editor .step {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(17,24,39,.6);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+.stock-editor input[type="number"] {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(17,24,39,.6);
+  color: var(--text);
+  text-align: center;
+  -moz-appearance: textfield; /* Firefox */
+}
+.stock-editor input[type=number]::-webkit-outer-spin-button,
+.stock-editor input[type=number]::-webkit-inner-spin-button{
+  -webkit-appearance: none; margin: 0; /* Chrome/Safari */
+}
+
+/* Toggle netjes uitgelijnd */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(17,24,39,.6);
+  height: 44px;
+}
+.toggle input[type="checkbox"] {
+  width: 18px; height: 18px;
+}
+
+/* Opslaan-knop vult kolomhoogte en is telefoonvriendelijk */
+button, .drink-btn {
+  min-height: 44px;
+}
+.actions button {
+  width: 100%;
+}
+
+/* Nieuw drankje sectie */
+.new-drink {
+  margin-top: 12px;
+  border-top: 1px dashed rgba(255,255,255,.15);
+  padding-top: 12px;
+}
+.new-drink .row {
+  grid-template-columns: 1fr; /* alles onder elkaar op mobiel */
+}
+.new-drink .meta {
+  display: grid;
+  gap: 8px;
+}
+.input-inline {
+  width: 100%;
+  max-width: none;
+}
+
+/* Vanaf ~480px: iets compacter in 2 kolommen voor acties */
+@media (min-width: 480px) {
+  .row .actions {
+    grid-template-columns: 1fr auto auto; /* stock-editor breed, toggle + save compact */
+  }
+}
+
+/* Vanaf ~720px: met zij‑aan‑zij layout indien ruimte */
+@media (min-width: 720px) {
+  .row {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+  .row .actions {
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+  }
+}
+/* ==== MOBILE OVERFLOW & LAYOUT FIXES FOR POPUP ==== */
+
+/* 1) Voorkom horizontaal scrollen van de pagina zelf */
+html, body {
+  overflow-x: hidden;
+}
+
+/* 2) Overlay: altijd binnen viewport, met safe-area en zonder overflow naar buiten */
+.overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+           max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  overflow: hidden;        /* geen horizontale scroll van de overlay zelf */
+}
+
+/* 3) Modal: nooit breder dan viewport - padding meegerekend */
+.modal {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(100vw - 24px);   /* 24px = 2x 12px overlay padding fallback */
+  max-height: calc(100vh - 24px);  /* zodat er verticale scroll mogelijk is */
+  overflow: auto;                  /* intern scrollen als inhoud lang is */
+  -webkit-overflow-scrolling: touch;
+  word-break: break-word;          /* lange namen breken */
+}
+
+/* 4) Lijsten en rijen mogen nooit uitzetten buiten de modal */
+.list {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  min-width: 0;   /* belangrijk voor grid-shrink op mobile */
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr;  /* één kolom op mobiel */
+  gap: 10px;
+  align-items: stretch;
+  min-width: 0;                /* laat content krimpen binnen container */
+  overflow: hidden;            /* afkappen van eventuele rare overflows */
+}
+
+/* 5) Acties in grid breken nooit uit scherm */
+.row .actions {
+  display: grid;
+  grid-template-columns: 1fr;  /* alles onder elkaar op smalle schermen */
+  gap: 10px;
+  min-width: 0;
+}
+
+/* 6) Stock-editor: knoppen en input schalen in breedte */
+.stock-editor {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto; /* input kan mee krimpen */
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+.stock-editor .step {
+  min-width: 44px;
+  min-height: 44px;
+}
+.stock-editor input[type="number"] {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* 7) Toggle en knoppen passen zich aan */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(17,24,39,.6);
+  min-height: 44px;
+  max-width: 100%; /* breek nooit uit */
+  box-sizing: border-box;
+}
+.toggle input[type="checkbox"] { width: 18px; height: 18px; }
+
+button, .drink-btn {
+  min-height: 44px;
+  width: 100%;         /* knoppen vullen kolom */
+  box-sizing: border-box;
+}
+
+/* 8) Nieuw drankje sectie volgt dezelfde regels */
+.new-drink .row {
+  grid-template-columns: 1fr;
+}
+.input-inline {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 9) Breder scherm? Dan naast elkaar, maar mét minmax(0,1fr) om overflow te vermijden */
+@media (min-width: 720px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .row .actions {
+    grid-template-columns: minmax(0, 1fr) auto auto; /* editor, toggle, opslaan */
+    align-items: center;
+  }
+}
+
+/* ===== Voorraadbeheer – “kaartjes” stijl volgens voorbeeld ===== */
+
+/* Compacte lijst met zachte kaarten */
+.admin-list { display: grid; gap: 10px; }
+.admin-item {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+/* Header van item: naam + zichtbaarheid + voorraad rechts */
+.admin-item-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+.admin-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.admin-eye { opacity: .9; }      /* 👁️ zichtbaar */
+.admin-hide { opacity: .9; }     /* 🚫 verborgen */
+.admin-stock { color: var(--text); opacity: .85; }
+
+/* Body (alleen zichtbaar wanneer geselecteerd) */
+.admin-item-body { display: none; margin-top: 8px; }
+.admin-item.active .admin-item-body { display: block; }
+
+/* Binnenkant van body: input + knoppen zoals voorbeeld */
+.admin-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(17,24,39,.6);
+  color: var(--text);
+}
+
+/* Knoppenbalk: UPDATE (blauw), VERBERG/TOON (grijs), VERWIJDER (rood) */
+.admin-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.btn { 
+  border: 0; border-radius: 8px; padding: 10px 12px; font-weight: 700; cursor: pointer;
+}
+.btn-blue   { background: #3b82f6; color: #fff; }
+.btn-gray   { background: #64748b; color: #fff; }
+.btn-red    { background: #ef4444; color: #fff; }
+
+/* Form voor nieuw drankje */
+.admin-new { display: grid; gap: 8px; margin-top: 10px; }
+.btn-green { background: #22c55e; color: #0b1022; font-weight: 800; }
+
+/* Zorg dat niets breder wordt dan scherm */
+.admin-list, .admin-item, .admin-actions { min-width: 0; }
+``

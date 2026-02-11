@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inloggen • Barkaart site</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .center{max-width:420px;margin:8vh auto;padding:0 16px}
+    .brand{text-align:center;margin-bottom:18px}
+    .brand h1{font-size:1.6rem;margin:0}
+    .tabs{display:flex;gap:8px;margin-bottom:10px}
+    .tab{flex:1;text-align:center;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(17,24,39,.6);cursor:pointer}
+    .tab.active{background:#22c55e;color:#0b1022;font-weight:700}
+    .hint{color:var(--muted);font-size:.9em;margin-top:8px}
+  </style>
+</head>
+<body>
+  <main class="center">
+    <div class="brand">
+      <h1>Barkaart site</h1>
+      <p class="subtitle">Log in of registreer om verder te gaan</p>
+    </div>
+
+    <div class="tabs">
+      <button id="tabLogin" class="tab active">Inloggen</button>
+      <button id="tabRegister" class="tab">Registreren</button>
+    </div>
+
+    <section class="card" id="loginCard">
+      <form id="login-form">
+        <label for="login-username">Gebruikersnaam</label>
+        <input id="login-username" type="text" placeholder="bijv. joran" required>
+        <label for="login-password" style="margin-top:10px">Wachtwoord</label>
+        <input id="login-password" type="password" placeholder="••••••••" required>
+        <button type="submit" style="width:100%">Inloggen</button>
+        <p id="login-error" class="subtitle" style="color:#fca5a5;display:none;margin-top:8px"></p>
+        <p class="hint">Demo bestaat nog: <code>admin / admin123</code></p>
+      </form>
+    </section>
+
+    <section class="card" id="registerCard" style="display:none">
+      <form id="register-form">
+        <label for="reg-username">Gebruikersnaam</label>
+        <input id="reg-username" type="text" placeholder="kies een naam" required>
+        <label for="reg-display" style="margin-top:10px">Weergavenaam (optioneel)</label>
+        <input id="reg-display" type="text" placeholder="getoond in de app">
+        <label for="reg-password" style="margin-top:10px">Wachtwoord</label>
+        <input id="reg-password" type="password" placeholder="min. 6 tekens" required>
+        <button type="submit" style="width:100%">Registreren</button>
+        <p id="register-error" class="subtitle" style="color:#fca5a5;display:none;margin-top:8px"></p>
+        <p class="hint">Na registreren word je automatisch ingelogd.</p>
+      </form>
+    </section>
+  </main>
+
+  <script src="/login.js"></script>
+</body>
+</html>
+``

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Barkaart site • Overzicht</title>
+
+  <!-- BELANGRIJK: correcte CSS-link -->
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Barkaart site</h1>
+    <p class="subtitle">Welkom, <strong id="displayName">—</strong></p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2 style="margin-top:0">Jouw streepjes</h2>
+      <p class="subtitle">Aantal over: <strong id="streepjes">—</strong></p>
+      <button id="pakDrankjeBtn" style="width:100%;margin-top:12px">Ik heb een drankje gepakt</button>
+    </section>
+  </main>
+
+  <!-- Modal: drankjes kiezen (popup) -->
+  <!-- Extra veiligheidsnet: inline display:none zodat popup nooit zichtbaar is bij initial load -->
+  <div class="overlay" id="overlay" aria-hidden="true" style="display:none">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 class="title" id="modalTitle">Kies je drankje</h3>
+
+      <div id="drinks" class="drinks-grid"></div>
+
+      <div id="confirm" style="display:none; margin-top:8px">
+        <p class="subtitle"><strong id="chosenName"></strong></p>
+        <div class="modal-actions">
+          <button id="cancelConfirm" class="danger">Annuleren</button>
+          <button id="confirmDrink">Bevestigen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BELANGRIJK: correcte JS-script tag -->
+  <script src="/app.js"></script>
+</body>
+</html>
