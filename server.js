@@ -101,16 +101,15 @@ function requireAuth(req, res, next) {
 
 const BARMEESTER_USERS = (process.env.BARMEESTER_USERS || '')
   .split(',')
-  .map(s => s.trim())
+  .map(s => s.trim().toLowerCase())
   .filter(Boolean);
 
 function isBarmeesterUser(username) {
-  if (BARMEESTER_USERS.length === 0) return username === DEMO_USER; // default alleen demo/admin
-  return BARMEESTER_USERS.includes(username);
-}
-function requireBarmeester(req, res, next) {
-  if (isBarmeesterUser(req.username)) return next();
-  return res.status(403).json({ error: 'Geen toegang (barmeester)' });
+  if (BARMEESTER_USERS.length === 0) {
+    // Fallback: alleen demo-user is barmeester als env leeg is
+    return (username || '').toLowerCase() === (process.env.LOGIN_USER || 'admin').toLowerCase();
+  }
+  return BARMEESTER_USERS.includes(String(username).toLowerCase());
 }
 
 // =====================================
