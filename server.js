@@ -1,5 +1,6 @@
 // server.js
 require('dotenv').config();
+console.log('[BOOT] BARMEESTER_USERS raw =', process.env.BARMEESTER_USERS);
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
