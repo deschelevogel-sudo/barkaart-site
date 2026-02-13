@@ -42,7 +42,7 @@ const DEMO_PASS = process.env.LOGIN_PASS || 'admin123';
 const BARMEESTER_USERS_RAW =
   (process.env.BARMEESTER_USERS && process.env.BARMEESTER_USERS.trim().length > 0)
     ? process.env.BARMEESTER_USERS
-    : 'admin,Bartmeister,Joran'; // <-- fallback als env leeg is
+    : 'admin,Bartmeister,Joran,ThijsW'; // <-- fallback als env leeg is
 
 
 const BARMEESTER_USERS = BARMEESTER_USERS_RAW
