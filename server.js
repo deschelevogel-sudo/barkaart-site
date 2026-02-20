@@ -34,7 +34,7 @@ mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 5000 })
 const userSchema = new mongoose.Schema({
   username: { type: String, unique: true, index: true },
   displayName: { type: String, default: '' },
-  streepjes: { type: Number, default: 10 },
+  streepjes: { type: Number, default: 0 },
   passwordHash: { type: String, default: '' },
   passwordSalt: { type: String, default: '' },
   isBarmeester: { type: Boolean, default: false }
