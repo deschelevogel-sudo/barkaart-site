@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Barkaart site • Financiën</title>
+  <!-- ✅ correcte styles-link -->
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Barkaart site</h1>
+    <p class="subtitle">Financiën</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2 style="margin-top:0">Kasoverzicht</h2>
+
+      <div id="cashStats" class="list">
+        <div class="row">
+          <div class="meta">
+            <div class="title">Bedrag in kas</div>
+            <div class="sub">Huidige stand (opening + in - uit)</div>
+          </div>
+          <div class="actions"><div id="cashBalance" class="toggle">—</div></div>
+        </div>
+
+        <div class="row">
+          <div class="meta">
+            <div class="title">In</div>
+            <div class="sub">Barkaarten & overige stortingen</div>
+          </div>
+          <div class="actions"><div id="cashIn" class="toggle">—</div></div>
+        </div>
+
+        <div class="row">
+          <div class="meta">
+            <div class="title">Uit</div>
+            <div class="sub">Inkopen/uitgaven</div>
+          </div>
+          <div class="actions"><div id="cashOut" class="toggle">—</div></div>
+        </div>
+
+        <div class="row">
+          <div class="meta">
+            <div class="title">Opening</div>
+            <div class="sub">Beginstand</div>
+          </div>
+          <div class="actions"><div id="cashOpening" class="toggle">—</div></div>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:12px">
+        <!-- ✅ IDs die het script verwacht -->
+        <button id="btnNewExpense">Transactie registreren</button>
+        <button id="btnPricing" style="margin-left:8px">Prijzen & streepjes per drankje</button>
+        <button id="btnRefresh" class="btn-gray" style="margin-left:8px">Vernieuwen</button>
+      </div>
+
+      <p class="subtitle" style="margin-top:8px">
+        Barkaart-toekenningen verhogen automatisch de kas met de ingestelde barkaartprijs.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">Transacties (laatste 100)</h2>
+      <div id="txList" class="admin-list">
+        <p class="subtitle">Laden…</p>
+      </div>
+    </section>
+  </main>
+
+  <footer><small>© 2026 Barkaart site</small></footer>
+
+  <!-- ✅ Overlay / modal (IDs die het script gebruikt) -->
+  <div class="overlay" id="overlay" aria-hidden="true" style="display:none">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+      <h3 class="title" id="modalTitle">Financiën</h3>
+      <div id="modalContent" class="list"></div>
+      <div class="modal-actions">
+        <button id="closeOverlay" class="danger">Sluiten</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ correcte script include, na HTML + met defer -->
+  <script src="/financien.js" defer></script>
+</body>
+</html>
