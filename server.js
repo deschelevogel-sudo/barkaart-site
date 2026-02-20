@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema({
   streepjes: { type: Number, default: 10 },
   passwordHash: { type: String, default: '' },
   passwordSalt: { type: String, default: '' },
+  isBarmeester: { type: Boolean, default: false }
 }, { timestamps: true });
 const User = mongoose.model('User', userSchema);
 
@@ -197,15 +198,23 @@ function requireAuth(req, res, next) {
 }
 
 // Barmeester-rechten
-const BARMEESTER_USERS = (process.env.BARMEESTER_USERS || '')
-  .split(',').map(s => s.trim()).filter(Boolean);
-function isBarmeesterUser(username) {
-  if (BARMEESTER_USERS.length === 0) return username === DEMO_USER; // default alleen demo/admin
-  return BARMEESTER_USERS.includes(username);
+async function isBarmeesterUser(username) {
+  const u = await User.findOne({ username }, { isBarmeester: 1 }).lean();
+  // Fallback: als er nog GEEN enkele barmeester bestaat, treat DEMO_USER als barmeester
+  if (!u) {
+    const anyAdmin = await User.exists({ isBarmeester: true });
+    return !anyAdmin && username === DEMO_USER;
+  }
+  return !!u.isBarmeester;
 }
-function requireBarmeester(req, res, next) {
-  if (isBarmeesterUser(req.username)) return next();
-  return res.status(403).json({ error: 'Geen toegang (barmeester)' });
+async function requireBarmeester(req, res, next) {
+  try {
+    if (await isBarmeesterUser(req.username)) return next();
+    return res.status(403).json({ error: 'Geen toegang (barmeester)' });
+  } catch (e) {
+    console.error('[AUTH BM] Fout:', e);
+    return res.status(500).json({ error: 'Autorisatie mislukt' });
+  }
 }
 
 // ===== API: afstrepers =====
@@ -216,7 +225,7 @@ app.get('/api/me', requireAuth, async (req, res) => {
     username: user.username,
     displayName: user.displayName || user.username,
     streepjes: user.streepjes,
-    isBarmeester: isBarmeesterUser(user.username)
+    isBarmeester: !!user.isBarmeester
   });
 });
 
@@ -269,6 +278,33 @@ app.post('/api/drinks/consume', requireAuth, async (req, res) => {
 app.get('/api/barmeester/users', requireAuth, requireBarmeester, async (req, res) => {
   const users = await User.find({}, { username: 1, displayName: 1, streepjes: 1 }).sort({ displayName: 1, username: 1 });
   res.json(users);
+});
+
+// ===== API: Barmeester — Admins beheren =====
+app.get('/api/barmeester/admins', requireAuth, requireBarmeester, async (req, res) => {
+  const admins = await User.find({ isBarmeester: true }, { username: 1, displayName: 1 }).sort({ displayName: 1, username: 1 }).lean();
+  res.json(admins);
+});
+
+app.post('/api/barmeester/admins/:username', requireAuth, requireBarmeester, async (req, res) => {
+  const uname = String(req.params.username || '').trim();
+  if (!uname) return res.status(400).json({ error: 'Ongeldige gebruikersnaam' });
+  const updated = await User.findOneAndUpdate({ username: uname }, { $set: { isBarmeester: true } }, { new: true });
+  if (!updated) return res.status(404).json({ error: 'Gebruiker niet gevonden' });
+  res.json({ ok: true, username: updated.username, isBarmeester: updated.isBarmeester });
+});
+
+app.delete('/api/barmeester/admins/:username', requireAuth, requireBarmeester, async (req, res) => {
+  const uname = String(req.params.username || '').trim();
+  if (!uname) return res.status(400).json({ error: 'Ongeldige gebruikersnaam' });
+
+  // voorkomen dat je de LAATSTE barmeester verwijdert
+  const count = await User.countDocuments({ isBarmeester: true });
+  if (count <= 1) return res.status(400).json({ error: 'Kan de laatste barmeester niet verwijderen' });
+
+  const updated = await User.findOneAndUpdate({ username: uname }, { $set: { isBarmeester: false } }, { new: true });
+  if (!updated) return res.status(404).json({ error: 'Gebruiker niet gevonden' });
+  res.json({ ok: true, username: updated.username, isBarmeester: updated.isBarmeester });
 });
 
 // ----- Settings (barmeester) -----
