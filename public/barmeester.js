@@ -16,6 +16,7 @@ function authFetch(url, options = {}) {
 const grantBtn        = document.getElementById('grantBtn');
 const stockBtn        = document.getElementById('stockBtn');
 const dashboardBtn    = document.getElementById('dashboardBtn');
+const financeBtn = document.getElementById('financeBtn');
 
 const overlay         = document.getElementById('overlay');
 const adminContent    = document.getElementById('adminContent');
@@ -320,12 +321,237 @@ async function openStock() { showOverlay('Voorraad beheren'); renderStock(); }
 // ====== 3) Dashboard openen ======
 function openDashboard() { window.location.href = '/dashboard.html'; }
 
+// === 4) Instellingen ===
+// Huidige refs bovenin worden hergebruikt (overlay, adminContent, showOverlay, hideOverlay, authFetch, ...)
+
+const settingsBtn = document.getElementById('settingsBtn');
+
+function formatEuro(n) {
+  // Toon € met 2 decimalen (zonder Intl afhankelijkheden)
+  if (typeof n !== 'number' || !isFinite(n)) return '€ 0,00';
+  return '€ ' + n.toFixed(2).replace('.', ',');
+}
+
+function sanitizePositiveInt(v, fallback = 0) {
+  const n = Math.floor(Number(String(v).replace(',', '.')));
+  return isFinite(n) && n > 0 ? n : fallback;
+}
+
+function sanitizePositiveMoney(v, fallback = 0) {
+  // accepteert zowel "14" als "14,00" of "14.00"
+  const n = Number(String(v).replace(',', '.'));
+  return isFinite(n) && n > 0 ? n : fallback;
+}
+
+async function fetchSettings() {
+  const res = await authFetch('/api/barmeester/settings');
+  if (!res.ok) throw new Error('Kon instellingen niet laden');
+  return res.json(); // { pricePerCard, stripsPerCard }
+}
+
+async function saveSettings(payload) {
+  const res = await authFetch('/api/barmeester/settings', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const js = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(js.error || 'Opslaan mislukt');
+  return js; // verwachte shape: { pricePerCard, stripsPerCard }
+}
+
+function renderSettingsUI(state) {
+  // state: { pricePerCard: number, stripsPerCard: number }
+  adminContent.innerHTML = '';
+
+  const list = document.createElement('div');
+  list.className = 'list';
+
+  // Rij: prijs per barkaart
+  const rowPrice = document.createElement('div');
+  rowPrice.className = 'row';
+
+  const metaPrice = document.createElement('div');
+  metaPrice.className = 'meta';
+  const titlePrice = document.createElement('div');
+  titlePrice.className = 'title';
+  titlePrice.textContent = 'Prijs per barkaart';
+  const subPrice = document.createElement('div');
+  subPrice.className = 'sub';
+  subPrice.textContent = 'Vul een bedrag in euro in (bijv. 14,00)';
+  metaPrice.appendChild(titlePrice);
+  metaPrice.appendChild(subPrice);
+
+  const actionsPrice = document.createElement('div');
+  actionsPrice.className = 'actions';
+  const inputPrice = document.createElement('input');
+  inputPrice.type = 'text';
+  inputPrice.inputMode = 'decimal';
+  inputPrice.placeholder = 'Bijv. 14,00';
+  inputPrice.className = 'input-inline';
+  inputPrice.value = (typeof state.pricePerCard === 'number' && state.pricePerCard > 0)
+    ? String(state.pricePerCard).replace('.', ',')
+    : '';
+  actionsPrice.appendChild(inputPrice);
+
+  rowPrice.appendChild(metaPrice);
+  rowPrice.appendChild(actionsPrice);
+
+  // Rij: streepjes per barkaart
+  const rowStrips = document.createElement('div');
+  rowStrips.className = 'row';
+
+  const metaStrips = document.createElement('div');
+  metaStrips.className = 'meta';
+  const titleStrips = document.createElement('div');
+  titleStrips.className = 'title';
+  titleStrips.textContent = 'Streepjes per barkaart';
+  const subStrips = document.createElement('div');
+  subStrips.className = 'sub';
+  subStrips.textContent = 'Bijv. 7';
+  metaStrips.appendChild(titleStrips);
+  metaStrips.appendChild(subStrips);
+
+  const actionsStrips = document.createElement('div');
+  actionsStrips.className = 'actions';
+  const inputStrips = document.createElement('input');
+  inputStrips.type = 'number';
+  inputStrips.inputMode = 'numeric';
+  inputStrips.min = '1';
+  inputStrips.step = '1';
+  inputStrips.placeholder = 'Bijv. 7';
+  inputStrips.className = 'input-inline';
+  inputStrips.value = (typeof state.stripsPerCard === 'number' && state.stripsPerCard > 0)
+    ? String(state.stripsPerCard)
+    : '';
+  actionsStrips.appendChild(inputStrips);
+
+  rowStrips.appendChild(metaStrips);
+  rowStrips.appendChild(actionsStrips);
+
+  // Rij: automatisch berekende prijs per streepje
+  const rowComputed = document.createElement('div');
+  rowComputed.className = 'row';
+
+  const metaComputed = document.createElement('div');
+  metaComputed.className = 'meta';
+  const titleComputed = document.createElement('div');
+  titleComputed.className = 'title';
+  titleComputed.textContent = 'Prijs per streepje (automatisch)';
+  const subComputed = document.createElement('div');
+  subComputed.className = 'sub';
+  subComputed.textContent = 'Afgeleid van prijs per kaart en het aantal streepjes';
+  metaComputed.appendChild(titleComputed);
+  metaComputed.appendChild(subComputed);
+
+  const actionsComputed = document.createElement('div');
+  actionsComputed.className = 'actions';
+  const computedOut = document.createElement('div');
+  computedOut.className = 'toggle'; // hergebruik compacte kapselstijl
+  computedOut.textContent = '—';
+  actionsComputed.appendChild(computedOut);
+
+  rowComputed.appendChild(metaComputed);
+  rowComputed.appendChild(actionsComputed);
+
+  // Actieknoppen onderaan
+  const actionBar = document.createElement('div');
+  actionBar.className = 'modal-actions';
+  const saveBtn = document.createElement('button');
+  saveBtn.textContent = 'Opslaan';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = 'Annuleren';
+  cancelBtn.className = 'danger';
+
+  actionBar.appendChild(cancelBtn);
+  actionBar.appendChild(saveBtn);
+
+  list.appendChild(rowPrice);
+  list.appendChild(rowStrips);
+  list.appendChild(rowComputed);
+  adminContent.appendChild(list);
+  adminContent.appendChild(actionBar);
+
+  // helper: recompute display
+  function updateComputed() {
+    const price = sanitizePositiveMoney(inputPrice.value, NaN);
+    const strips = sanitizePositiveInt(inputStrips.value, 0);
+    if (!isFinite(price) || strips <= 0) {
+      computedOut.textContent = '—';
+      return;
+    }
+    const perStrip = price / strips;
+    computedOut.textContent = formatEuro(perStrip);
+  }
+
+  // init
+  updateComputed();
+
+  // events
+  inputPrice.addEventListener('input', updateComputed);
+  inputStrips.addEventListener('input', updateComputed);
+
+  cancelBtn.addEventListener('click', () => hideOverlay());
+  saveBtn.addEventListener('click', async () => {
+    const price = sanitizePositiveMoney(inputPrice.value, 0);
+    const strips = sanitizePositiveInt(inputStrips.value, 0);
+
+    if (price <= 0) { alert('Voer een geldige prijs per barkaart in.'); return; }
+    if (strips <= 0) { alert('Voer een geldig aantal streepjes per barkaart in.'); return; }
+
+    saveBtn.disabled = true;
+    cancelBtn.disabled = true;
+    saveBtn.textContent = 'Opslaan…';
+
+    try {
+      const saved = await saveSettings({ pricePerCard: price, stripsPerCard: strips });
+      // UI bijwerken met definitieve waarden van de server
+      inputPrice.value = String(saved.pricePerCard).replace('.', ',');
+      inputStrips.value = String(saved.stripsPerCard);
+      updateComputed();
+      alert('Instellingen opgeslagen.');
+      hideOverlay();
+    } catch (e) {
+      alert(e.message || 'Opslaan mislukt.');
+      saveBtn.disabled = false;
+      cancelBtn.disabled = false;
+      saveBtn.textContent = 'Opslaan';
+    }
+  });
+}
+
+async function renderSettings() {
+  adminContent.innerHTML = '<p class="subtitle">Instellingen laden…</p>';
+  try {
+    const settings = await fetchSettings(); // { pricePerCard, stripsPerCard }
+    renderSettingsUI({
+      pricePerCard: Number(settings.pricePerCard) || 0,
+      stripsPerCard: Number(settings.stripsPerCard) || 0,
+    });
+  } catch {
+    // als laden faalt: toon lege UI zodat je alsnog kunt opslaan
+    renderSettingsUI({ pricePerCard: 0, stripsPerCard: 0 });
+  }
+}
+
+function openSettings() {
+  showOverlay('Instellingen');
+  renderSettings();
+}
+
+// Onder aan het bestand bij Events toevoegen:
+settingsBtn?.addEventListener('click', openSettings);
+
 // ===== Events =====
 document.addEventListener('DOMContentLoaded', ensureBarmeester);
 grantBtn?.addEventListener('click', openGrant);
 stockBtn?.addEventListener('click', openStock);
 dashboardBtn?.addEventListener('click', openDashboard);
 closeOverlayBtn?.addEventListener('click', hideOverlay);
+financeBtn?.addEventListener('click', () => {
+  window.location.href = '/financien.html';
+});
+
 
 // ESC en tik buiten de modal sluiten
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideOverlay(); });
