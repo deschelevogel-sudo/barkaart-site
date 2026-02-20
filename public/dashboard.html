@@ -1,0 +1,88 @@
+
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard • Barmeester</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    /* Kleine uitbreidingen voor eenvoudige 'bar charts' binnen de bestaande stijl */
+    .chart-list { list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+    .chart-item { display:grid; grid-template-columns: 100px 1fr auto; gap:10px; align-items:center; }
+    .chart-label { color: var(--muted); font-size: .9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .chart-bar { height: 12px; border-radius: 6px; background: rgba(255,255,255,.12); position: relative; overflow:hidden; }
+    .chart-bar > span { position:absolute; left:0; top:0; bottom:0; background: #22c55e; }
+    .chart-value { font-weight:700; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Dashboard</h1>
+    <p class="subtitle">Barmeester</p>
+    <div style="margin-top:8px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+      <button id="toAfstreepBtn">Naar afstreepscherm</button>
+      <button id="toAdminBtn">Naar beheer</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Filters -->
+    <section class="card" aria-label="Filters">
+      <div class="row" style="gap:8px;">
+        <div class="actions" style="grid-template-columns: 1fr auto auto;">
+          <select id="rangeSelect" class="input-inline" aria-label="Periode">
+            <option value="today">Vandaag</option>
+            <option value="7d">Afgelopen 7 dagen</option>
+            <option value="30d">Afgelopen 30 dagen</option>
+          </select>
+          <button id="refreshBtn">Vernieuwen</button>
+        </div>
+      </div>
+      <p class="subtitle" id="rangeHint" style="margin-top:8px;"></p>
+    </section>
+
+    <!-- KPI’s -->
+    <section class="card" aria-label="Kerncijfers">
+      <div class="drinks-grid" id="kpiGrid"></div>
+    </section>
+
+    <!-- Top drankjes -->
+    <section class="card" aria-label="Top drankjes">
+      <h2 style="margin-top:0">Top 5 drankjes</h2>
+      <ul class="items" id="topDrinksList"></ul>
+    </section>
+
+    <!-- Top gebruikers -->
+    <section class="card" aria-label="Top gebruikers">
+      <h2 style="margin-top:0">Meest actieve gebruikers</h2>
+      <ul class="items" id="topUsersList"></ul>
+    </section>
+
+    <!-- Activiteitstempo -->
+    <section class="card" aria-label="Activiteitstempo">
+      <h2 style="margin-top:0" id="histTitle">Consumpties per uur</h2>
+      <ul class="chart-list" id="histogram"></ul>
+    </section>
+
+    <!-- Recente transacties -->
+    <section class="card" aria-label="Recent">
+      <h2 style="margin-top:0">Recentste transacties</h2>
+      <ul class="items" id="recentList"></ul>
+    </section>
+
+    <!-- Voorraadalerts -->
+    <section class="card" aria-label="Voorraadalerts">
+      <h2 style="margin-top:0">Voorraadalerts</h2>
+      <ul class="items" id="lowStockList"></ul>
+      <p class="subtitle" id="lowStockEmpty" style="display:none;">Geen lage voorraad 🎉</p>
+    </section>
+  </main>
+
+  <footer>
+    <small>© 2026 Barkaart site</small>
+  </footer>
+
+  <script src="/dashboard.js"></script>
+</body>
+</html>
