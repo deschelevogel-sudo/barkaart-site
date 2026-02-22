@@ -138,7 +138,7 @@ app.post('/api/auth/register', async (req, res) => {
     const user = await User.create({
       username,
       displayName: displayName || username,
-      streepjes: 10,
+      streepjes: 0,
       passwordHash: hash,
       passwordSalt: salt,
     });
