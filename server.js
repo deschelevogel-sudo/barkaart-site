@@ -239,7 +239,6 @@ app.post('/api/drinks/consume', requireAuth, async (req, res) => {
     const { drinkId } = req.body ?? {};
     const user = await User.findOne({ username: req.username });
     if (!user) return res.status(404).json({ error: 'Gebruiker niet gevonden' });
-    if (user.streepjes <= 0) return res.status(400).json({ error: 'Geen streepjes meer over' });
 
     let drink = null;
     if (drinkId) {
